@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: AI Chatbot API for Todo Application
+  description: API endpoints for the AI chatbot integration that allows users to manage tasks via natural language
+  version: 1.0.0
+  contact:
+    name: Development Team
+    email: dev@example.com
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: http://localhost:8000
+    description: Development server
+
+paths:
+  /api/{user_id}/chat:
+    post:
+      summary: Process chat message and return AI response
+      description: |
+        Protected endpoint that processes a user's chat message using AI agent
+        and returns the AI response along with any tool calls executed.
+        The user_id in the path must match the authenticated user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the authenticated user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                conversation_id:
+                  type: integer
+                  description: Optional existing conversation ID, creates new if omitted
+                  example: 123
+                message:
+                  type: string
+                  description: The user's message to the AI assistant
+                  example: "Add a task to buy groceries"
+      responses:
+        '200':
+          description: Successful response from AI assistant
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - conversation_id
+                  - response
+                properties:
+                  conversation_id:
+                    type: integer
+                    description: The conversation ID (newly created if not provided)
+                    example: 123
+                  response:
+                    type: string
+                    description: The AI assistant's response
+                    example: "Task 'buy groceries' has been created successfully"
+                  tool_calls:
+                    type: array
+                    description: List of tools called during the interaction
+                    items:
+                      type: object
+                      properties:
+                        tool_name:
+                          type: string
+                          description: Name of the tool called
+                          example: "add_task"
+                        parameters:
+                          type: object
+                          description: Parameters passed to the tool
+                          example:
+                            user_id: "user123"
+                            title: "buy groceries"
+                        result:
+                          type: object
+                          description: Result returned by the tool
+                          example:
+                            task_id: 456
+                            status: "created"
+                            title: "buy groceries"
+        '401':
+          description: Unauthorized - Invalid or missing JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Unauthorized"
+        '403':
+          description: Forbidden - user_id in path doesn't match authenticated user
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Access denied: user ID mismatch"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+                    example: "Internal server error occurred"
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from authentication endpoint
+
+tags:
+  - name: chat
+    description: Chatbot interaction endpoints
+  - name: ai
+    description: AI-powered task management

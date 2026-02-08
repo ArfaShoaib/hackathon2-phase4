@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next/
+dist/
+out/
+
+# Environment variables
+.env*
+!.env.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Git
+.git/
+
+# Next.js specific
+.next/cache/
+.svelte-kit/
+build/
+
+# Temporary files
+tmp/
+temp/
+.npm/
+.yarn/
+
+# Documentation
+docs/
+
+# Tests
+test/
+tests/
+__tests__/
+spec/
+specs/

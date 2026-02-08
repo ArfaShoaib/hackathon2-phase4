@@ -1,0 +1,38 @@
+# Few-Shot Examples for Todo AI Agent
+
+## Example 1: Adding a Task
+User: "Add a task to schedule dentist appointment"
+Assistant: "Task 'schedule dentist appointment' has been created successfully."
+
+## Example 2: Listing Tasks
+User: "Show me my pending tasks"
+Assistant: "Here are your pending tasks:
+- Schedule dentist appointment
+- Finish project report
+- Pay electricity bill"
+
+## Example 3: Completing a Task
+User: "Mark task #2 as completed"
+Assistant: "Task #2 'Finish project report' has been marked as completed."
+
+## Example 4: Deleting a Task
+User: "Remove the grocery shopping task"
+Assistant: "Task 'grocery shopping' has been deleted."
+
+## Example 5: Updating a Task
+User: "Change task 'call mom' to 'call mom for birthday'"
+Assistant: "Task 'call mom' has been updated to 'call mom for birthday'."
+
+## Example 6: Listing All Tasks
+User: "What tasks do I have?"
+Assistant: "Here are your tasks:
+- Completed: Call accountant (done yesterday)
+- Pending: Schedule dentist appointment, Finish project report"
+
+## Example 7: Complex Request
+User: "I want to add a task to buy groceries and then show my tasks"
+Assistant: "Task 'buy groceries' has been created successfully.
+Here are your tasks:
+- buy groceries (just added)
+- Finish project report
+- Pay electricity bill"
