@@ -1,6 +1,8 @@
 from sqlmodel import SQLModel, Field
 from datetime import datetime
 from typing import Optional
+from pydantic import field_serializer
+from typing import Union
 
 
 class MessageBase(SQLModel):
@@ -26,4 +28,10 @@ class Message(MessageBase, table=True):
 class MessagePublic(MessageBase):
     """Public representation of message without internal fields"""
     id: int
-    created_at: datetime
+    created_at: Union[datetime, str]
+    
+    @field_serializer('created_at')
+    def serialize_created_at(self, value: Union[datetime, str]):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return value

@@ -1,0 +1,39 @@
+{{- if .Values.backend.enabled | default true }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-app.fullname" . }}-backend-svc
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "todo-app.selectorLabels" . | nindent 4 }}
+    app: backend
+{{- end }}
+---
+{{- if .Values.frontend.enabled | default true }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-app.fullname" . }}-frontend-svc
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "todo-app.selectorLabels" . | nindent 4 }}
+    app: frontend
+{{- end }}

@@ -1,0 +1,242 @@
+# Default values for todo-app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Configuration for the backend service
+backend:
+  # Enable or disable the backend service
+  enabled: true
+  
+  # This will set the replica count for the backend
+  replicaCount: 1
+  
+  # This sets the container image for the backend
+  image:
+    repository: chatbot-backend
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  
+  # Service configuration for the backend
+  service:
+    type: ClusterIP
+    port: 7860
+    targetPort: 7860
+    
+  # Container port configuration
+  containerPort: 7860
+  
+  # Resources configuration
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  
+  # Environment variables for the backend
+  env:
+    - name: DATABASE_URL
+      value: "postgresql://neondb_owner:npg_Uuv1SlE6iJqt@ep-bitter-glitter-ai50m3dx-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    - name: SECRET_KEY
+      value: "local-development-secret-key-change-in-production"
+    - name: ALGORITHM
+      value: "HS256"
+    - name: ACCESS_TOKEN_EXPIRE_MINUTES
+      value: "30"
+    - name: DB_POOL_SIZE
+      value: "5"
+    - name: DB_POOL_MAX_OVERFLOW
+      value: "10"
+  
+  # Liveness and readiness probes
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Configuration for the frontend service
+frontend:
+  # Enable or disable the frontend service
+  enabled: true
+  
+  # This will set the replica count for the frontend
+  replicaCount: 1
+  
+  # This sets the container image for the frontend
+  image:
+    repository: hackathon2-frontend
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  
+  # Service configuration for the frontend
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+    
+  # Container port configuration
+  containerPort: 3000
+  
+  # Resources configuration
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  
+  # Environment variables for the frontend
+  env:
+    - name: NEXT_PUBLIC_API_URL
+      value: "http://todo-app-backend-svc:7860"  # Points to the backend service in the cluster
+  
+  # Liveness and readiness probes
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Common configurations
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account.
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  className: ""
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+          backendService:
+            name: todo-app-frontend-svc
+            port: 3000
+        - path: /api
+          pathType: Prefix
+          backendService:
+            name: todo-app-backend-svc
+            port: 7860
+  tls: []
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+
+# -- Expose the service via gateway-api HTTPRoute
+# Requires Gateway API resources and suitable controller installed within the cluster
+# (see: https://gateway-api.sigs.k8s.io/guides/)
+httpRoute:
+  # HTTPRoute enabled.
+  enabled: false
+  # HTTPRoute annotations.
+  annotations: {}
+  # Which Gateways this Route is attached to.
+  parentRefs:
+  - name: gateway
+    sectionName: http
+    # namespace: default
+  # Hostnames matching HTTP header.
+  hostnames:
+  - chart-example.local
+  # List of rules and filters applied.
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /headers
+  #   filters:
+  #   - type: RequestHeaderModifier
+  #     requestHeaderModifier:
+  #       set:
+  #       - name: My-Overwrite-Header
+  #         value: this-is-the-only-value
+  #       remove:
+  #       - User-Agent
+  # - matches:
+  #   - path:
+  #       type: PathPrefix
+  #       value: /echo
+  #     headers:
+  #     - name: version
+  #       value: v2
+
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
